@@ -1,28 +1,45 @@
-import { apiWeather } from './apsWeather/apsWeather';
 import './App.css';
-import { useEffect, useState } from 'react';
+import { apiPokemon } from './apiPokemon/apiPokemon';
+import { useState } from 'react';
 
+interface Pokemon {
+  name: string,
+  sprites: {front_default: string}
+}
 
 function App() {
-  const [state, setState] = useState([])
+  const [pokemon,setPokemon] = useState<Pokemon>()
+  const [inputValue, setInputValue] = useState("")
 
-  useEffect(()=>{
-    const fetchData = async ()=> {
-      const data = await apiWeather.getData()
-      //console.log("data",data.data.results);
-      setState(data.data.results)
+  const handleSubmit = async()=>{
+    try {
+      const fetchPokemon = await apiPokemon.getPokemon(inputValue)
+      if(fetchPokemon && inputValue){
+        setPokemon(fetchPokemon.data)
+      }
+      setInputValue("")    
+      
+    } catch (error) {
+      console.log(error);
+      
     }
-    fetchData()
     
-    
-  }, [])
-
-  console.log(state);
+  }
   
   return (
     <div className="App">
+      <h1 className='textInfo'>Escreva o nome do pokemon e clique em buscar!</h1>
+      <div>
+        <input className='inputText' type="text" value={inputValue} onChange={(e)=>setInputValue(e.target.value)}/>
+        <button className='buttonSubmit' onClick={handleSubmit}>Buscar</button>
+      </div>
       
-      {state?.map((item: {name:""}) => <p>{item?.name}</p>)}
+      {pokemon &&
+       <div className='card'>
+          <img src={pokemon?.sprites?.front_default} alt={pokemon?.name} />
+          <h2>{pokemon?.name}</h2>
+       </div>
+      }   
     </div>
   );
 }
